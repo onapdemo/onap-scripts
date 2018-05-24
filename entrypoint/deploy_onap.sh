@@ -3,12 +3,11 @@ usage() {
   cat <<EOF
 Usage: $0 [PARAMs]
 example 
-./deploy_onap.sh -b amsterdam -e onap -t single (will rerun onap in the onap namespace, no new repo, no deletion of existing repo, deployment on single vm)
-./deploy_onap.sh -b amsterdam -e onap -t cluster (will rerun onap in the onap namespace, no new repo, no deletion of existing repo, deployment on k8s cluster)
-./deploy_onap.sh -b amsterdam -e onap -c true -d true ( new oom, delete prev oom)
+./deploy_onap.sh  -e onap -t single (will rerun onap in the onap namespace, no new repo, no deletion of existing repo, deployment on single vm)
+./deploy_onap.sh  -e onap -t cluster (will rerun onap in the onap namespace, no new repo, no deletion of existing repo, deployment on k8s cluster)
+./deploy_onap.sh  -e onap -c true -d true ( new oom, delete prev oom)
 
 -u                  : Display usage
--b [branch]         : branch = master or amsterdam (required)
 -e [environment]    : use the default (onap)
 -c [true|false]     : FLAG clone new oom repo (default: true)
 -d [true|false]     : FLAG delete prev oom - (cd build) (default: false)
@@ -22,6 +21,8 @@ deploy_oom()
 {
 
     if [[ "$TYPE_OF_VM" != "cluster" ]] && [[ "$DEPLOY_RANCHER" != false ]]; then
+	
+	   wget https://git.onap.org/logging-analytics/plain/deploy/rancher/oom_rancher_setup.sh
        sudo chmod 777 oom_rancher_setup.sh
       ./oom_rancher_setup.sh -b $BRANCH -s $DNS_NAME -e $ENVIRON	 
     fi	  
@@ -29,13 +30,8 @@ deploy_oom()
 	if [[ "$DELETE_PREV_OOM" != false ]]; then
       echo "remove existing oom"
       source oom/kubernetes/oneclick/setenv.bash
-
-      # master/beijing only - not amsterdam
-      if [ "$BRANCH" == "master" ]; then
-        oom/kubernetes/oneclick/deleteAll.bash -n $ENVIRON -y
-      else
-        oom/kubernetes/oneclick/deleteAll.bash -n $ENVIRON
-      fi
+      
+	  oom/kubernetes/oneclick/deleteAll.bash -n $ENVIRON
 
       sleep 1
       # verify
@@ -61,16 +57,17 @@ deploy_oom()
     if [[ "$CLONE_NEW_OOM" != false ]]; then 
       rm -rf oom
       echo "pull new oom"
-	  docker pull elhaydox/oom:azure
-	  docker run --rm -it -v $PWD:/test/ elhaydox/oom:azure
-	  apt install zip -y
-      unzip oom.zip -d oom
-	 
+	  #docker pull elhaydox/oom:azure
+	  #docker run --rm -it -v $PWD:/test/ elhaydox/oom:azure
+	  #apt install zip -y
+      #unzip oom.zip -d oom
+	  git clone https://github.com/onapdemo/oom.git
       echo "start config pod"
       source oom/kubernetes/oneclick/setenv.bash
       cd oom/kubernetes/config
 	  mv onap-parameters.yaml onap-parameters-orig.yaml 
-      cp onap-parameters-sample.yaml onap-parameters.yaml 
+      cp onap-parameters-sample.yaml onap-parameters.yaml
+	  sudo chmod 777 createConfig.sh
       ./createConfig.sh -n $ENVIRON
       cd ../../../
 
@@ -83,6 +80,7 @@ deploy_oom()
     echo "start onap pods"
     source oom/kubernetes/oneclick/setenv.bash
     cd oom/kubernetes/oneclick
+	sudo chmod 777 createAll.bash
     if [[ "$TYPE_OF_VM" != "cluster" ]]; then
       ./createAll.bash -n $ENVIRON
     else
@@ -92,7 +90,7 @@ deploy_oom()
 
 }
 
-BRANCH=
+BRANCH=amsterdam
 ENVIRON=onap
 DELETE_PREV_OOM=false
 CLONE_NEW_OOM=true
@@ -100,14 +98,11 @@ TYPE_OF_VM=
 DEPLOY_RANCHER=false
 DNS_NAME=
 
-while getopts ":u:b:e:c:d:t:r:n:" PARAM; do
+while getopts ":u:e:c:d:t:r:n:" PARAM; do
   case $PARAM in
     u)
       usage
       exit 1
-      ;;
-    b)
-      BRANCH=${OPTARG}
       ;;
     e)
       ENVIRON=${OPTARG}
@@ -134,10 +129,6 @@ while getopts ":u:b:e:c:d:t:r:n:" PARAM; do
   esac
 done
 
-if [[ -z $BRANCH ]]; then
-  usage
-  exit 1
-fi
 if [[ -z $TYPE_OF_VM ]]; then
   usage
   exit 1
@@ -147,6 +138,6 @@ if [[ -z $DNS_NAME ]]; then
   exit 1
 fi
 
-deploy_oom $BRANCH $ENVIRON $CLONE_NEW_OOM $DELETE_PREV_OOM $TYPE_OF_VM $DEPLOY_RANCHER $DNS_NAME
+deploy_oom $ENVIRON $CLONE_NEW_OOM $DELETE_PREV_OOM $TYPE_OF_VM $DEPLOY_RANCHER $DNS_NAME
 
 printf "**** Done ****\n"
