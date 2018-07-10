@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 DOCKER_VERSION=17.03
 RANCHER_VERSION=1.6.14
 KUBECTL_VERSION=1.8.10
@@ -65,6 +67,9 @@ SERVER =$1
 PRIVATE_IP = $2
 NODE_COUNT = $3
 
+echo "SERVER: $SERVER"
+echo "PRIVATE_IP: $PRIVATE_IP"
+echo "NODE_COUNT: $NODE_COUNT"
 #install sshpass to login to the k8s nodes to run rancher agent
 sudo apt-get install sshpass
 
