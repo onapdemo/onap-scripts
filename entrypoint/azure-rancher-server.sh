@@ -62,6 +62,9 @@ echo "/dockerdata-nfs "$NFS_EXP | sudo tee -a /etc/exports
 sudo exportfs -a
 sudo systemctl restart nfs-kernel-server
 
+echo "wait before installing rancher server"
+sleep 60
+
 # Create ONAP environment on rancher and register the nodes...
 SERVER=$1
 PRIVATE_IP=$2
@@ -89,7 +92,7 @@ sleep 60
 echo "1 min left"
 sleep 60
 echo "get public and private tokens back to the rancher server so we can register the client later"
-API_RESPONSE=`curl -s 'http://127.0.0.1:8080/v2-beta/apikey' -d '{"type":"apikey","accountId":"1a1","name":"autoinstall","description":"autoinstall","created":null,"kind":null,"removeTime":null,"removed":null,"uuid":null}'`
+API_RESPONSE=`curl -s 'http://$SERVER:8080/v2-beta/apikey' -d '{"type":"apikey","accountId":"1a1","name":"autoinstall","description":"autoinstall","created":null,"kind":null,"removeTime":null,"removed":null,"uuid":null}'`
 # Extract and store token
 echo "API_RESPONSE: $API_RESPONSE"
 KEY_PUBLIC=`echo $API_RESPONSE | jq -r .publicValue`
@@ -129,7 +132,7 @@ echo "60 more sec"
 sleep 60
 
 # see registrationUrl in
-REGISTRATION_TOKENS=`curl http://127.0.0.1:8080/v2-beta/registrationtokens`
+REGISTRATION_TOKENS=`curl http://$SERVER:8080/v2-beta/registrationtokens`
 echo "REGISTRATION_TOKENS: $REGISTRATION_TOKENS"
 REGISTRATION_URL=`echo $REGISTRATION_TOKENS | jq -r .data[0].registrationUrl`
 REGISTRATION_DOCKER=`echo $REGISTRATION_TOKENS | jq -r .data[0].image`
@@ -138,12 +141,12 @@ echo "Registering host for image: $REGISTRATION_DOCKER url: $REGISTRATION_URL re
 HOST_REG_COMMAND=`echo $REGISTRATION_TOKENS | jq -r .data[0].command`
 
 #Loop using the private IP and the no of VMS to SSH into each machine
-for i in `seq 1 ${NODE_COUNT}`;
+for i in `seq 1 $((${NODE_COUNT}-1))`;
 do
 	NODE_IP=${PRIVATE_IP}$i
 	sshpass -p "oom" ssh -o StrictHostKeyChecking=no root@${NODE_IP} "sudo docker run --rm --privileged -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/racher:/var/lib/rancher $REGISTRATION_DOCKER $RANCHER_URL/v1/scripts/$REGISTRATION_TOKEN"
 done
-
+`
 echo "waiting 10 min for host registration to finish"
 sleep 540
 echo "1 more min"
