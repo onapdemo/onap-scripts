@@ -63,13 +63,13 @@ sudo exportfs -a
 sudo systemctl restart nfs-kernel-server
 
 # Create ONAP environment on rancher and register the nodes...
-SERVER =$1
-PRIVATE_IP = $2
-NODE_COUNT = $3
+SERVER=$1
+PRIVATE_IP=$2
+NODE_COUNT=$3
 
-echo "SERVER: $SERVER"
-echo "PRIVATE_IP: $PRIVATE_IP"
-echo "NODE_COUNT: $NODE_COUNT"
+echo "SERVER: ${SERVER}"
+echo "PRIVATE_IP: ${PRIVATE_IP}"
+echo "NODE_COUNT: ${NODE_COUNT}"
 #install sshpass to login to the k8s nodes to run rancher agent
 sudo apt-get install sshpass
 
