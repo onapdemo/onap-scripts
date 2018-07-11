@@ -165,7 +165,7 @@ clusters:
 - cluster:
     api-version: v1
     insecure-skip-tls-verify: true
-    server: "https://$SERVER:8880/r/projects/$PROJECT_ID/kubernetes:6443"
+    server: "https://$SERVER:8080/r/projects/$PROJECT_ID/kubernetes:6443"
   name: "${ENVIRON}"
 contexts:
 - context:
