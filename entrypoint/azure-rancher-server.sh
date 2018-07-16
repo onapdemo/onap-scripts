@@ -144,7 +144,7 @@ HOST_REG_COMMAND=`echo $REGISTRATION_TOKENS | jq -r .data[0].command`
 for i in `seq 1 $((${NODE_COUNT}-1))`;
 do
 	NODE_IP=${PRIVATE_IP}$i
-	sshpass -p "oom" ssh -o StrictHostKeyChecking=no root@${NODE_IP} "hostnamectl set-hostname node$i && sudo docker run --rm --privileged -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/racher:/var/lib/rancher $REGISTRATION_DOCKER $RANCHER_URL/v1/scripts/$REGISTRATION_TOKEN"
+	sshpass -p "oom" ssh -o StrictHostKeyChecking=no root@${NODE_IP} "docker run --rm --privileged -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/racher:/var/lib/rancher $REGISTRATION_DOCKER $RANCHER_URL/v1/scripts/$REGISTRATION_TOKEN"
 done
 
 echo "waiting 10 min for host registration to finish"
