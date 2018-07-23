@@ -16,14 +16,14 @@
       "type": "int",
       "defaultValue": 5,
       "minValue": 1,
-      "maxValue": 10,
+      "maxValue": 15,
       "metadata": {
         "description": "Number of VMs to provision"
       }
     },
     "privateIPAddress": {
       "type": "string",
-	  "defaultValue": "10.0.0.4",
+	  "defaultValue": "10.0.0.2",
       "metadata": {
         "description": "Static Private IP will be assigned to the machine"
       }
@@ -47,8 +47,8 @@
         "Standard_E8_v3",
         "Standard_E2_v3",
         "Standard_D1",
-	"Standard_D16s_v3",
-        "Standard_D4_v3",
+	    "Standard_D16s_v3",
+        "Standard_D4_v2",
         "Standard_D32s_v3",
         "Standard_E16_v3",
         "Standard_D14_v2",
