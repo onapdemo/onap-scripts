@@ -68,30 +68,42 @@
 
   },
   "variables": {
-    "dnsLabelPrefix": "[concat(uniquestring('dns'))]",
+    "dnsLabelPrefix": "[concat('dns-',uniquestring(resourceGroup().id))]",
     "customData": [ "userdata.txt" ], 
-    "vmName": "[concat(uniquestring('k8s'))]",
+    "vmName": "[concat('k8s-host-', substring(uniquestring(resourceGroup().id),0,4))]",
     "adminUsername": "[concat('ubuntu')]",
     "adminPassword": "Qwertyuiop@@1",
     "sshKeyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD5zrmH1dHgXbNwP2qbNVySScnFVcEP25HBd2VJu2PiJLDhwgHj44Lj9ZvLyRFCetqd8CAKnLV5qy37rwaCtlH/t8Qb36cUGPhegxpF2++uTY0b6K7Zb6hEMBNw3J1z+GU7OoVwZJhsNAw4t8/7WWmJA4Owo99TJkEKvhCYjBCLoC5sIvG/lJsaFIG8A5MjnBlwgSZ3FsUU+aY1KYZUztodkyv7laDMOinwSvJggKrCugsqZdVo5bhmcSFbqrZa/a/wgqeok+79W0/DLh5Tlf7By46ASDKGnFlwDshPu++I3KMU3eRz0rJLOKeIUCz7k80X0WJ6BrSS7l+IrpDXV1M5 ubuntu@aria",
-    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'salinuxvm')]",
+    "storageAccountName": "[concat('salinuxvm', substring(uniquestring(resourceGroup().id),0,4))]",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
-    "nicName": "[concat(variables('vmName'),'VMNic')]",
-    "dnsPrefix": "[concat(variables('dnsLabelPrefix'),uniquestring(resourceGroup().id))]",
+    "nicName": "[concat('VMNic-',variables('vmName'))]",
+    "dnsPrefix": "[concat(variables('dnsLabelPrefix'),'-',substring(uniquestring(resourceGroup().id),0,4))]",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressType": "Dynamic",
-	"publicIPAddressName": "nicLoop100",
-    "virtualNetworkName": "[concat(variables('vmName'),'VNET')]",
+	  "publicIPAddressName": "nicLoop100",
+    "virtualNetworkName": "[concat('VNET-',variables('vmName'))]",
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets/', variables('virtualNetworkName'), variables('subnetName'))]",
     "networkSecurityGroupName": "[concat(variables('vmName'), '_obrien_local_nsg')]",
     "sshKeyPathRoot": "[concat('/root/','/.ssh/authorized_keys')]",
-    "sshKeyPath": "[concat('/home/',variables('adminUsername'),'/.ssh/authorized_keys')]"
+    "sshKeyPath": "[concat('/home/',variables('adminUsername'),'/.ssh/authorized_keys')]",
+    "availabilitySetName": "[concat('availabilitySet-',substring(uniquestring(resourceGroup().id),0,4))]"
   },
   "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('availabilitySetName')]",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "managed": true,
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 3
+      }
+    },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
@@ -313,11 +325,15 @@
       },
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "nicLoop"
+        "nicLoop",
+        "[concat('Microsoft.Compute/availabilitySets/',variables('availabilitySetName'))]"
       ],
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
+        },
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
         },
         "osProfile": {
           "computerName": "[concat(variables('vmName'), copyindex())]",
