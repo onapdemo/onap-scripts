@@ -5,6 +5,8 @@ REPO_URL_ARTIFACTS=$(cat /opt/config/repo_url_artifacts.txt)
 DEMO_ARTIFACTS_VERSION=$(cat /opt/config/demo_artifacts_version.txt)
 INSTALL_SCRIPT_VERSION=$(cat /opt/config/install_script_version.txt)
 CLOUD_ENV=$(cat /opt/config/cloud_env.txt)
+VES_REPO_URL_ARTIFACTS="https://raw.githubusercontent.com/onapdemo/onap-scripts/beijing"
+VES_DEMO_ARTIFACTS_VERSION="1.1.1"
 
 # Convert Network CIDR to Netmask
 cdr2mask () {
@@ -61,13 +63,13 @@ wget $REPO_URL_BLOB/org.onap.demo/vnfs/vlb/$INSTALL_SCRIPT_VERSION/dnsmembership
 wget $REPO_URL_BLOB/org.onap.demo/vnfs/vlb/$INSTALL_SCRIPT_VERSION/add_dns.sh
 wget $REPO_URL_BLOB/org.onap.demo/vnfs/vlb/$INSTALL_SCRIPT_VERSION/remove_dns.sh
 wget $REPO_URL_ARTIFACTS/org/onap/demo/vnf/vlb/dns-manager/$DEMO_ARTIFACTS_VERSION/dns-manager-$DEMO_ARTIFACTS_VERSION.jar
-wget $REPO_URL_ARTIFACTS/org/onap/demo/vnf/ves5/ves/$DEMO_ARTIFACTS_VERSION/ves-$DEMO_ARTIFACTS_VERSION-demo.tar.gz
-wget $REPO_URL_ARTIFACTS/org/onap/demo/vnf/ves5/ves_vlb_reporting/$DEMO_ARTIFACTS_VERSION/ves_vlb_reporting-$DEMO_ARTIFACTS_VERSION-demo.tar.gz
+wget $VES_REPO_URL_ARTIFACTS/org/onap/demo/vnf/ves5/ves/$VES_DEMO_ARTIFACTS_VERSION/ves-$VES_DEMO_ARTIFACTS_VERSION-demo.tar.gz
+wget $VES_REPO_URL_ARTIFACTS/org/onap/demo/vnf/ves5/ves_vlb_reporting/$VES_DEMO_ARTIFACTS_VERSION/ves_vlb_reporting-$VES_DEMO_ARTIFACTS_VERSION-demo.tar.gz
 
-tar -zmxvf ves-$DEMO_ARTIFACTS_VERSION-demo.tar.gz
-mv ves-$DEMO_ARTIFACTS_VERSION VES
-tar -zmxvf ves_vlb_reporting-$DEMO_ARTIFACTS_VERSION-demo.tar.gz
-mv ves_vlb_reporting-$DEMO_ARTIFACTS_VERSION VESreporting_vLB
+tar -zmxvf ves-$VES_DEMO_ARTIFACTS_VERSION-demo.tar.gz
+mv ves-$VES_DEMO_ARTIFACTS_VERSION VES
+tar -zmxvf ves_vlb_reporting-$VES_DEMO_ARTIFACTS_VERSION-demo.tar.gz
+mv ves_vlb_reporting-$VES_DEMO_ARTIFACTS_VERSION VESreporting_vLB
 
 mv VESreporting_vLB /opt/VES/evel/evel-library/code/VESreporting
 mv dns-manager-$DEMO_ARTIFACTS_VERSION.jar /opt/FDserver/dns-manager-$DEMO_ARTIFACTS_VERSION.jar
