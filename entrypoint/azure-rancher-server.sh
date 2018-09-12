@@ -5,7 +5,7 @@ set -x
 DOCKER_VERSION=17.03
 RANCHER_VERSION=1.6.14
 KUBECTL_VERSION=1.8.10
-HELM_VERSION=2.8.2
+HELM_VERSION=2.9.1
 
 # setup root access - default login: oom/oom - comment out to restrict access too ssh key only
 sed -i 's/PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
